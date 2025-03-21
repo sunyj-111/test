@@ -1,0 +1,549 @@
+2025-03-12 22:56:38,842 INFO: 
+                ____                _       _____  ____
+               / __ ) ____ _ _____ (_)_____/ ___/ / __ \
+              / __  |/ __ `// ___// // ___/\__ \ / /_/ /
+             / /_/ // /_/ /(__  )/ // /__ ___/ // _, _/
+            /_____/ \__,_//____//_/ \___//____//_/ |_|
+     ______                   __   __                 __      __
+    / ____/____   ____   ____/ /  / /   __  __ _____ / /__   / /
+   / / __ / __ \ / __ \ / __  /  / /   / / / // ___// //_/  / /
+  / /_/ // /_/ // /_/ // /_/ /  / /___/ /_/ // /__ / /<    /_/
+  \____/ \____/ \____/ \____/  /_____/\____/ \___//_/|_|  (_)
+    
+Version Information: 
+	BasicSR: 1.2.0+ac1e6b0
+	PyTorch: 2.3.0+cu121
+	TorchVision: 0.18.0+cu121
+2025-03-12 22:56:38,843 INFO: 
+  name: EFNet_highrev_single_deblur
+  model_type: ImageEventRestorationModel
+  scale: 1
+  num_gpu: 1
+  manual_seed: 10
+  datasets:[
+    train:[
+      name: highrev-train
+      type: NpzPngSingleDeblurDataset
+      dataroot: ./datasets/HighREV/train
+      voxel_bins: 6
+      gt_size: 256
+      norm_voxel: True
+      use_hflip: True
+      use_rot: True
+      filename_tmpl: {}
+      io_backend:[
+        type: disk
+      ]
+      use_shuffle: True
+      num_worker_per_gpu: 3
+      batch_size_per_gpu: 4
+      dataset_enlarge_ratio: 4
+      prefetch_mode: cpu
+      num_prefetch_queue: 2
+      phase: train
+      scale: 1
+    ]
+    val:[
+      name: highrev-val
+      type: NpzPngSingleDeblurDataset
+      voxel_bins: 6
+      dataroot: /root/autodl-tmp/NTIRE2025_EventDeblur_challenge-main/datasets/HighREV/val
+      gt_size: None
+      norm_voxel: True
+      io_backend:[
+        type: disk
+      ]
+      use_hflip: False
+      use_rot: False
+      phase: val
+      scale: 1
+    ]
+  ]
+  dataset_name: HighREV
+  network_g:[
+    type: EFNet
+    wf: 64
+    fuse_before_downsample: True
+  ]
+  path:[
+    pretrain_network_g: None
+    strict_load_g: True
+    resume_state: experiments/EFNet_highrev_single_deblur/training_states/40000.state
+    training_states: /root/autodl-tmp/NTIRE2025_EventDeblur_challenge-main/experiments/EFNet_highrev_single_deblur/training_states
+    root: /root/autodl-tmp/NTIRE2025_EventDeblur_challenge-main
+    experiments_root: /root/autodl-tmp/NTIRE2025_EventDeblur_challenge-main/experiments/EFNet_highrev_single_deblur
+    models: /root/autodl-tmp/NTIRE2025_EventDeblur_challenge-main/experiments/EFNet_highrev_single_deblur/models
+    log: /root/autodl-tmp/NTIRE2025_EventDeblur_challenge-main/experiments/EFNet_highrev_single_deblur
+    visualization: /root/autodl-tmp/NTIRE2025_EventDeblur_challenge-main/experiments/EFNet_highrev_single_deblur/visualization
+  ]
+  train:[
+    optim_g:[
+      type: AdamW
+      lr: 0.0002
+      weight_decay: 0.0001
+      betas: [0.9, 0.99]
+    ]
+    scheduler:[
+      type: TrueCosineAnnealingLR
+      T_max: 200000
+      eta_min: 1e-07
+    ]
+    total_iter: 70000
+    warmup_iter: -1
+    pixel_opt:[
+      type: PSNRLoss
+      loss_weight: 0.5
+      reduction: mean
+    ]
+  ]
+  val:[
+    val_freq: 10000
+    save_img: False
+    grids: None
+    crop_size: None
+    max_minibatch: 8
+    metrics:[
+      psnr:[
+        type: calculate_psnr
+        crop_border: 0
+        test_y_channel: False
+      ]
+      ssim:[
+        type: calculate_ssim
+        crop_border: 0
+        test_y_channel: False
+      ]
+    ]
+  ]
+  logger:[
+    print_freq: 200
+    save_checkpoint_freq: 20000.0
+    use_tb_logger: True
+  ]
+  dist_params:[
+    backend: nccl
+    port: 29500
+  ]
+  is_train: True
+  dist: False
+  rank: 0
+  world_size: 1
+
+2025-03-12 22:57:15,227 INFO: Dataset initialized with 1771 samples.
+2025-03-12 22:57:15,228 INFO: Dataset NpzPngSingleDeblurDataset - highrev-train is created.
+2025-03-12 22:57:15,228 INFO: Use cpu prefetch dataloader: num_prefetch_queue = 2
+2025-03-12 22:57:15,229 INFO: Training statistics:
+	Number of train images: 1771
+	Dataset enlarge ratio: 4
+	Batch size per gpu: 4
+	World size (gpu number): 1
+	Require iter number per epoch: 1771
+	Total epochs: 40; iters: 70000.
+2025-03-12 22:57:17,287 INFO: Dataset initialized with 421 samples.
+2025-03-12 22:57:17,287 INFO: Dataset NpzPngSingleDeblurDataset - highrev-val is created.
+2025-03-12 22:57:17,287 INFO: Number of val images/folders in highrev-val: 421
+2025-03-12 22:57:17,287 INFO: Set pretrain_network_g to /root/autodl-tmp/NTIRE2025_EventDeblur_challenge-main/experiments/EFNet_highrev_single_deblur/models/net_g_40000.pth
+2025-03-12 22:57:17,421 INFO: Network: EFNet, with parameters: 11,438,592
+2025-03-12 22:57:17,421 INFO: EFNet(
+  (down_path_1): ModuleList(
+    (0): UNetConvBlock(
+      (identity): Conv2d(64, 64, kernel_size=(1, 1), stride=(1, 1))
+      (conv_1): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+      (relu_1): LeakyReLU(negative_slope=0.2)
+      (conv_2): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+      (relu_2): LeakyReLU(negative_slope=0.2)
+      (downsample): Conv2d(64, 64, kernel_size=(4, 4), stride=(2, 2), padding=(1, 1), bias=False)
+      (image_event_transformer): EventImage_ChannelAttentionTransformerBlock(
+        (norm1_image): LayerNorm(
+          (body): WithBias_LayerNorm()
+        )
+        (norm1_event): LayerNorm(
+          (body): WithBias_LayerNorm()
+        )
+        (attn): Mutual_Attention(
+          (q_image): Conv2d(64, 64, kernel_size=(1, 1), stride=(1, 1), bias=False)
+          (kv_event): Conv2d(64, 128, kernel_size=(1, 1), stride=(1, 1), bias=False)
+          (q_event): Conv2d(64, 64, kernel_size=(1, 1), stride=(1, 1), bias=False)
+          (kv_image): Conv2d(64, 128, kernel_size=(1, 1), stride=(1, 1), bias=False)
+          (proj_out): Conv2d(64, 64, kernel_size=(1, 1), stride=(1, 1), bias=False)
+        )
+        (norm2): LayerNorm((64,), eps=1e-05, elementwise_affine=True)
+        (ffn): Mlp(
+          (fc1): Linear(in_features=64, out_features=256, bias=True)
+          (act): GELU(approximate='none')
+          (fc2): Linear(in_features=256, out_features=64, bias=True)
+          (drop): Dropout(p=0.0, inplace=False)
+        )
+      )
+    )
+    (1): UNetConvBlock(
+      (identity): Conv2d(64, 128, kernel_size=(1, 1), stride=(1, 1))
+      (conv_1): Conv2d(64, 128, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+      (relu_1): LeakyReLU(negative_slope=0.2)
+      (conv_2): Conv2d(128, 128, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+      (relu_2): LeakyReLU(negative_slope=0.2)
+      (downsample): Conv2d(128, 128, kernel_size=(4, 4), stride=(2, 2), padding=(1, 1), bias=False)
+      (image_event_transformer): EventImage_ChannelAttentionTransformerBlock(
+        (norm1_image): LayerNorm(
+          (body): WithBias_LayerNorm()
+        )
+        (norm1_event): LayerNorm(
+          (body): WithBias_LayerNorm()
+        )
+        (attn): Mutual_Attention(
+          (q_image): Conv2d(128, 128, kernel_size=(1, 1), stride=(1, 1), bias=False)
+          (kv_event): Conv2d(128, 256, kernel_size=(1, 1), stride=(1, 1), bias=False)
+          (q_event): Conv2d(128, 128, kernel_size=(1, 1), stride=(1, 1), bias=False)
+          (kv_image): Conv2d(128, 256, kernel_size=(1, 1), stride=(1, 1), bias=False)
+          (proj_out): Conv2d(128, 128, kernel_size=(1, 1), stride=(1, 1), bias=False)
+        )
+        (norm2): LayerNorm((128,), eps=1e-05, elementwise_affine=True)
+        (ffn): Mlp(
+          (fc1): Linear(in_features=128, out_features=512, bias=True)
+          (act): GELU(approximate='none')
+          (fc2): Linear(in_features=512, out_features=128, bias=True)
+          (drop): Dropout(p=0.0, inplace=False)
+        )
+      )
+    )
+    (2): UNetConvBlock(
+      (identity): Conv2d(128, 256, kernel_size=(1, 1), stride=(1, 1))
+      (conv_1): Conv2d(128, 256, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+      (relu_1): LeakyReLU(negative_slope=0.2)
+      (conv_2): Conv2d(256, 256, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+      (relu_2): LeakyReLU(negative_slope=0.2)
+      (image_event_transformer): EventImage_ChannelAttentionTransformerBlock(
+        (norm1_image): LayerNorm(
+          (body): WithBias_LayerNorm()
+        )
+        (norm1_event): LayerNorm(
+          (body): WithBias_LayerNorm()
+        )
+        (attn): Mutual_Attention(
+          (q_image): Conv2d(256, 256, kernel_size=(1, 1), stride=(1, 1), bias=False)
+          (kv_event): Conv2d(256, 512, kernel_size=(1, 1), stride=(1, 1), bias=False)
+          (q_event): Conv2d(256, 256, kernel_size=(1, 1), stride=(1, 1), bias=False)
+          (kv_image): Conv2d(256, 512, kernel_size=(1, 1), stride=(1, 1), bias=False)
+          (proj_out): Conv2d(256, 256, kernel_size=(1, 1), stride=(1, 1), bias=False)
+        )
+        (norm2): LayerNorm((256,), eps=1e-05, elementwise_affine=True)
+        (ffn): Mlp(
+          (fc1): Linear(in_features=256, out_features=1024, bias=True)
+          (act): GELU(approximate='none')
+          (fc2): Linear(in_features=1024, out_features=256, bias=True)
+          (drop): Dropout(p=0.0, inplace=False)
+        )
+      )
+    )
+  )
+  (down_path_2): ModuleList(
+    (0): UNetConvBlock(
+      (identity): Conv2d(64, 64, kernel_size=(1, 1), stride=(1, 1))
+      (conv_1): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+      (relu_1): LeakyReLU(negative_slope=0.2)
+      (conv_2): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+      (relu_2): LeakyReLU(negative_slope=0.2)
+      (emgc_enc): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+      (emgc_dec): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+      (emgc_enc_mask): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+      (emgc_dec_mask): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+      (downsample): Conv2d(64, 64, kernel_size=(4, 4), stride=(2, 2), padding=(1, 1), bias=False)
+    )
+    (1): UNetConvBlock(
+      (identity): Conv2d(64, 128, kernel_size=(1, 1), stride=(1, 1))
+      (conv_1): Conv2d(64, 128, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+      (relu_1): LeakyReLU(negative_slope=0.2)
+      (conv_2): Conv2d(128, 128, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+      (relu_2): LeakyReLU(negative_slope=0.2)
+      (emgc_enc): Conv2d(128, 128, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+      (emgc_dec): Conv2d(128, 128, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+      (emgc_enc_mask): Conv2d(128, 128, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+      (emgc_dec_mask): Conv2d(128, 128, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+      (downsample): Conv2d(128, 128, kernel_size=(4, 4), stride=(2, 2), padding=(1, 1), bias=False)
+    )
+    (2): UNetConvBlock(
+      (identity): Conv2d(128, 256, kernel_size=(1, 1), stride=(1, 1))
+      (conv_1): Conv2d(128, 256, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+      (relu_1): LeakyReLU(negative_slope=0.2)
+      (conv_2): Conv2d(256, 256, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+      (relu_2): LeakyReLU(negative_slope=0.2)
+    )
+  )
+  (conv_01): Conv2d(3, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+  (conv_02): Conv2d(3, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+  (down_path_ev): ModuleList(
+    (0): UNetEVConvBlock(
+      (identity): Conv2d(64, 64, kernel_size=(1, 1), stride=(1, 1))
+      (conv_1): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+      (relu_1): LeakyReLU(negative_slope=0.2)
+      (conv_2): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+      (relu_2): LeakyReLU(negative_slope=0.2)
+      (conv_before_merge): Conv2d(64, 64, kernel_size=(1, 1), stride=(1, 1))
+      (downsample): Conv2d(64, 64, kernel_size=(4, 4), stride=(2, 2), padding=(1, 1), bias=False)
+    )
+    (1): UNetEVConvBlock(
+      (identity): Conv2d(64, 128, kernel_size=(1, 1), stride=(1, 1))
+      (conv_1): Conv2d(64, 128, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+      (relu_1): LeakyReLU(negative_slope=0.2)
+      (conv_2): Conv2d(128, 128, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+      (relu_2): LeakyReLU(negative_slope=0.2)
+      (conv_before_merge): Conv2d(128, 128, kernel_size=(1, 1), stride=(1, 1))
+      (downsample): Conv2d(128, 128, kernel_size=(4, 4), stride=(2, 2), padding=(1, 1), bias=False)
+    )
+    (2): UNetEVConvBlock(
+      (identity): Conv2d(128, 256, kernel_size=(1, 1), stride=(1, 1))
+      (conv_1): Conv2d(128, 256, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+      (relu_1): LeakyReLU(negative_slope=0.2)
+      (conv_2): Conv2d(256, 256, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+      (relu_2): LeakyReLU(negative_slope=0.2)
+      (conv_before_merge): Conv2d(256, 256, kernel_size=(1, 1), stride=(1, 1))
+    )
+  )
+  (conv_ev1): Conv2d(6, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+  (dynamic_fusion_modules): ModuleList(
+    (0): EventDynamicConv(
+      (dynamic_kernel_generator): Sequential(
+        (0): Conv2d(64, 16, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+        (1): ReLU(inplace=True)
+        (2): Conv2d(16, 576, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+      )
+      (static_conv): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+    )
+    (1): EventDynamicConv(
+      (dynamic_kernel_generator): Sequential(
+        (0): Conv2d(128, 32, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+        (1): ReLU(inplace=True)
+        (2): Conv2d(32, 1152, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+      )
+      (static_conv): Conv2d(128, 128, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+    )
+    (2): EventDynamicConv(
+      (dynamic_kernel_generator): Sequential(
+        (0): Conv2d(256, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+        (1): ReLU(inplace=True)
+        (2): Conv2d(64, 2304, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+      )
+      (static_conv): Conv2d(256, 256, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+    )
+  )
+  (up_path_1): ModuleList(
+    (0): UNetUpBlock(
+      (up): ConvTranspose2d(256, 128, kernel_size=(2, 2), stride=(2, 2))
+      (conv_block): UNetConvBlock(
+        (identity): Conv2d(256, 128, kernel_size=(1, 1), stride=(1, 1))
+        (conv_1): Conv2d(256, 128, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+        (relu_1): LeakyReLU(negative_slope=0.2)
+        (conv_2): Conv2d(128, 128, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+        (relu_2): LeakyReLU(negative_slope=0.2)
+      )
+    )
+    (1): UNetUpBlock(
+      (up): ConvTranspose2d(128, 64, kernel_size=(2, 2), stride=(2, 2))
+      (conv_block): UNetConvBlock(
+        (identity): Conv2d(128, 64, kernel_size=(1, 1), stride=(1, 1))
+        (conv_1): Conv2d(128, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+        (relu_1): LeakyReLU(negative_slope=0.2)
+        (conv_2): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+        (relu_2): LeakyReLU(negative_slope=0.2)
+      )
+    )
+  )
+  (up_path_2): ModuleList(
+    (0): UNetUpBlock(
+      (up): ConvTranspose2d(256, 128, kernel_size=(2, 2), stride=(2, 2))
+      (conv_block): UNetConvBlock(
+        (identity): Conv2d(256, 128, kernel_size=(1, 1), stride=(1, 1))
+        (conv_1): Conv2d(256, 128, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+        (relu_1): LeakyReLU(negative_slope=0.2)
+        (conv_2): Conv2d(128, 128, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+        (relu_2): LeakyReLU(negative_slope=0.2)
+      )
+    )
+    (1): UNetUpBlock(
+      (up): ConvTranspose2d(128, 64, kernel_size=(2, 2), stride=(2, 2))
+      (conv_block): UNetConvBlock(
+        (identity): Conv2d(128, 64, kernel_size=(1, 1), stride=(1, 1))
+        (conv_1): Conv2d(128, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+        (relu_1): LeakyReLU(negative_slope=0.2)
+        (conv_2): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+        (relu_2): LeakyReLU(negative_slope=0.2)
+      )
+    )
+  )
+  (skip_conv_1): ModuleList(
+    (0): Conv2d(128, 128, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+    (1): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+  )
+  (skip_conv_2): ModuleList(
+    (0): Conv2d(128, 128, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+    (1): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+  )
+  (sam12): SAM(
+    (conv1): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+    (conv2): Conv2d(64, 3, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+    (conv3): Conv2d(3, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+  )
+  (cat12): Conv2d(128, 64, kernel_size=(1, 1), stride=(1, 1))
+  (last): Conv2d(64, 3, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+)
+2025-03-12 22:57:17,421 INFO: Loading EFNet model from /root/autodl-tmp/NTIRE2025_EventDeblur_challenge-main/experiments/EFNet_highrev_single_deblur/models/net_g_40000.pth.
+2025-03-12 22:57:17,488 INFO: Model [ImageEventRestorationModel] is created.
+2025-03-12 22:57:17,490 INFO: Resuming training from epoch: 22, iter: 40000.
+2025-03-12 22:57:17,525 INFO: Start training from epoch: 22, iter: 40000
+2025-03-12 23:06:53,212 INFO: [EFNet..][epoch: 22, iter:  40,200, lr:(1.807e-04,1.808e-05,)] [eta: 23:42:32, time (data): 0.188 (0.002)] l_pix: -3.7904e+01 
+2025-03-12 23:16:23,418 INFO: [EFNet..][epoch: 22, iter:  40,400, lr:(1.805e-04,1.806e-05,)] [eta: 23:29:44, time (data): 0.191 (0.002)] l_pix: -3.6886e+01 
+2025-03-12 23:24:58,169 INFO: [EFNet..][epoch: 22, iter:  40,600, lr:(1.804e-04,1.804e-05,)] [eta: 22:33:55, time (data): 4.443 (4.248)] l_pix: -3.6433e+01 
+2025-03-12 23:34:19,240 INFO: [EFNet..][epoch: 22, iter:  40,800, lr:(1.802e-04,1.803e-05,)] [eta: 22:29:49, time (data): 0.189 (0.002)] l_pix: -4.5020e+01 
+2025-03-12 23:43:17,824 INFO: [EFNet..][epoch: 22, iter:  41,000, lr:(1.800e-04,1.801e-05,)] [eta: 22:12:46, time (data): 4.113 (3.921)] l_pix: -4.0706e+01 
+2025-03-12 23:52:03,985 INFO: [EFNet..][epoch: 22, iter:  41,200, lr:(1.798e-04,1.799e-05,)] [eta: 21:53:27, time (data): 1.219 (1.028)] l_pix: -4.2443e+01 
+2025-03-13 00:01:21,989 INFO: [EFNet..][epoch: 22, iter:  41,400, lr:(1.796e-04,1.797e-05,)] [eta: 21:47:58, time (data): 1.885 (1.695)] l_pix: -3.7627e+01 
+2025-03-13 00:10:27,359 INFO: [EFNet..][epoch: 22, iter:  41,600, lr:(1.794e-04,1.795e-05,)] [eta: 21:37:48, time (data): 0.189 (0.002)] l_pix: -4.0377e+01 
+2025-03-13 00:20:44,963 INFO: [EFNet..][epoch: 23, iter:  41,800, lr:(1.792e-04,1.793e-05,)] [eta: 21:46:44, time (data): 0.190 (0.002)] l_pix: -3.9323e+01 
+2025-03-13 00:29:18,024 INFO: [EFNet..][epoch: 23, iter:  42,000, lr:(1.790e-04,1.791e-05,)] [eta: 21:27:26, time (data): 0.188 (0.002)] l_pix: -3.9840e+01 
+2025-03-13 00:38:29,605 INFO: [EFNet..][epoch: 23, iter:  42,200, lr:(1.788e-04,1.789e-05,)] [eta: 21:18:11, time (data): 13.831 (13.637)] l_pix: -4.0864e+01 
+2025-03-13 00:47:14,535 INFO: [EFNet..][epoch: 23, iter:  42,400, lr:(1.786e-04,1.787e-05,)] [eta: 21:03:51, time (data): 0.195 (0.003)] l_pix: -4.0551e+01 
+2025-03-13 00:55:53,623 INFO: [EFNet..][epoch: 23, iter:  42,600, lr:(1.784e-04,1.785e-05,)] [eta: 20:49:21, time (data): 0.188 (0.002)] l_pix: -4.2912e+01 
+2025-03-13 01:04:25,826 INFO: [EFNet..][epoch: 23, iter:  42,800, lr:(1.783e-04,1.783e-05,)] [eta: 20:34:34, time (data): 0.189 (0.002)] l_pix: -3.9750e+01 
+2025-03-13 01:13:52,999 INFO: [EFNet..][epoch: 23, iter:  43,000, lr:(1.781e-04,1.782e-05,)] [eta: 20:28:52, time (data): 0.188 (0.002)] l_pix: -4.1444e+01 
+2025-03-13 01:23:10,973 INFO: [EFNet..][epoch: 23, iter:  43,200, lr:(1.779e-04,1.780e-05,)] [eta: 20:21:24, time (data): 5.399 (5.206)] l_pix: -3.8579e+01 
+2025-03-13 01:32:17,911 INFO: [EFNet..][epoch: 23, iter:  43,400, lr:(1.777e-04,1.778e-05,)] [eta: 20:12:17, time (data): 0.190 (0.002)] l_pix: -4.3008e+01 
+2025-03-13 01:41:01,267 INFO: [EFNet..][epoch: 24, iter:  43,600, lr:(1.775e-04,1.776e-05,)] [eta: 20:00:18, time (data): 0.192 (0.002)] l_pix: -3.8270e+01 
+2025-03-13 01:50:17,293 INFO: [EFNet..][epoch: 24, iter:  43,800, lr:(1.773e-04,1.774e-05,)] [eta: 19:52:24, time (data): 0.189 (0.002)] l_pix: -3.9515e+01 
+2025-03-13 01:58:57,403 INFO: [EFNet..][epoch: 24, iter:  44,000, lr:(1.771e-04,1.772e-05,)] [eta: 19:40:29, time (data): 3.052 (2.856)] l_pix: -4.2731e+01 
+2025-03-13 02:08:27,116 INFO: [EFNet..][epoch: 24, iter:  44,200, lr:(1.769e-04,1.770e-05,)] [eta: 19:33:56, time (data): 0.189 (0.002)] l_pix: -3.9335e+01 
+2025-03-13 02:16:43,070 INFO: [EFNet..][epoch: 24, iter:  44,400, lr:(1.767e-04,1.768e-05,)] [eta: 19:19:59, time (data): 0.188 (0.002)] l_pix: -3.4315e+01 
+2025-03-13 02:25:23,194 INFO: [EFNet..][epoch: 24, iter:  44,600, lr:(1.765e-04,1.766e-05,)] [eta: 19:08:45, time (data): 0.189 (0.002)] l_pix: -3.5213e+01 
+2025-03-13 02:34:16,506 INFO: [EFNet..][epoch: 24, iter:  44,800, lr:(1.763e-04,1.764e-05,)] [eta: 18:58:52, time (data): 0.191 (0.002)] l_pix: -3.9612e+01 
+2025-03-13 02:43:42,516 INFO: [EFNet..][epoch: 24, iter:  45,000, lr:(1.761e-04,1.762e-05,)] [eta: 18:51:48, time (data): 4.127 (3.932)] l_pix: -3.5886e+01 
+2025-03-13 02:52:34,827 INFO: [EFNet..][epoch: 24, iter:  45,200, lr:(1.758e-04,1.760e-05,)] [eta: 18:41:53, time (data): 0.188 (0.002)] l_pix: -3.9910e+01 
+2025-03-13 03:02:30,974 INFO: [EFNet..][epoch: 25, iter:  45,400, lr:(1.756e-04,1.758e-05,)] [eta: 18:36:52, time (data): 17.982 (17.778)] l_pix: -3.8777e+01 
+2025-03-13 03:11:55,141 INFO: [EFNet..][epoch: 25, iter:  45,600, lr:(1.754e-04,1.755e-05,)] [eta: 18:29:12, time (data): 0.189 (0.002)] l_pix: -4.0012e+01 
+2025-03-13 03:20:49,058 INFO: [EFNet..][epoch: 25, iter:  45,800, lr:(1.752e-04,1.753e-05,)] [eta: 18:19:18, time (data): 0.188 (0.002)] l_pix: -3.9153e+01 
+2025-03-13 03:30:07,015 INFO: [EFNet..][epoch: 25, iter:  46,000, lr:(1.750e-04,1.751e-05,)] [eta: 18:11:04, time (data): 4.655 (4.462)] l_pix: -3.9151e+01 
+2025-03-13 03:38:32,925 INFO: [EFNet..][epoch: 25, iter:  46,200, lr:(1.748e-04,1.749e-05,)] [eta: 17:59:26, time (data): 2.247 (2.052)] l_pix: -4.2541e+01 
+2025-03-13 03:47:20,731 INFO: [EFNet..][epoch: 25, iter:  46,400, lr:(1.746e-04,1.747e-05,)] [eta: 17:49:21, time (data): 2.033 (1.840)] l_pix: -3.9581e+01 
+2025-03-13 03:57:16,319 INFO: [EFNet..][epoch: 25, iter:  46,600, lr:(1.744e-04,1.745e-05,)] [eta: 17:43:21, time (data): 12.538 (12.345)] l_pix: -3.7999e+01 
+2025-03-13 04:05:50,074 INFO: [EFNet..][epoch: 25, iter:  46,800, lr:(1.742e-04,1.743e-05,)] [eta: 17:32:28, time (data): 6.915 (6.719)] l_pix: -3.8830e+01 
+2025-03-13 04:14:07,175 INFO: [EFNet..][epoch: 25, iter:  47,000, lr:(1.740e-04,1.741e-05,)] [eta: 17:20:48, time (data): 0.188 (0.002)] l_pix: -3.9560e+01 
+2025-03-13 04:22:25,405 INFO: [EFNet..][epoch: 26, iter:  47,200, lr:(1.738e-04,1.739e-05,)] [eta: 17:09:23, time (data): 3.239 (3.044)] l_pix: -4.0705e+01 
+2025-03-13 04:30:58,660 INFO: [EFNet..][epoch: 26, iter:  47,400, lr:(1.736e-04,1.737e-05,)] [eta: 16:58:54, time (data): 7.402 (7.207)] l_pix: -3.9675e+01 
+2025-03-13 04:40:20,590 INFO: [EFNet..][epoch: 26, iter:  47,600, lr:(1.733e-04,1.735e-05,)] [eta: 16:50:55, time (data): 0.188 (0.002)] l_pix: -4.0833e+01 
+2025-03-13 04:49:10,364 INFO: [EFNet..][epoch: 26, iter:  47,800, lr:(1.731e-04,1.732e-05,)] [eta: 16:41:20, time (data): 1.519 (1.330)] l_pix: -3.4369e+01 
+2025-03-13 04:58:13,549 INFO: [EFNet..][epoch: 26, iter:  48,000, lr:(1.729e-04,1.730e-05,)] [eta: 16:32:24, time (data): 0.190 (0.002)] l_pix: -3.7157e+01 
+2025-03-13 05:08:06,956 INFO: [EFNet..][epoch: 26, iter:  48,200, lr:(1.727e-04,1.728e-05,)] [eta: 16:25:41, time (data): 0.190 (0.003)] l_pix: -4.2107e+01 
+2025-03-13 05:16:40,529 INFO: [EFNet..][epoch: 26, iter:  48,400, lr:(1.725e-04,1.726e-05,)] [eta: 16:15:23, time (data): 0.984 (0.794)] l_pix: -3.4571e+01 
+2025-03-13 05:25:15,239 INFO: [EFNet..][epoch: 26, iter:  48,600, lr:(1.723e-04,1.724e-05,)] [eta: 16:05:14, time (data): 0.188 (0.002)] l_pix: -3.7612e+01 
+2025-03-13 05:34:02,331 INFO: [EFNet..][epoch: 26, iter:  48,800, lr:(1.720e-04,1.722e-05,)] [eta: 15:55:38, time (data): 2.020 (1.826)] l_pix: -4.1062e+01 
+2025-03-13 05:42:25,344 INFO: [EFNet..][epoch: 27, iter:  49,000, lr:(1.718e-04,1.720e-05,)] [eta: 15:45:09, time (data): 7.049 (6.855)] l_pix: -4.2354e+01 
+2025-03-13 05:51:30,574 INFO: [EFNet..][epoch: 27, iter:  49,200, lr:(1.716e-04,1.717e-05,)] [eta: 15:36:20, time (data): 3.425 (3.230)] l_pix: -4.0803e+01 
+2025-03-13 06:00:19,006 INFO: [EFNet..][epoch: 27, iter:  49,400, lr:(1.714e-04,1.715e-05,)] [eta: 15:26:54, time (data): 8.571 (8.377)] l_pix: -4.0725e+01 
+2025-03-13 06:08:25,623 INFO: [EFNet..][epoch: 27, iter:  49,600, lr:(1.712e-04,1.713e-05,)] [eta: 15:16:01, time (data): 0.188 (0.002)] l_pix: -4.3801e+01 
+2025-03-13 06:17:36,909 INFO: [EFNet..][epoch: 27, iter:  49,800, lr:(1.709e-04,1.711e-05,)] [eta: 15:07:28, time (data): 0.188 (0.002)] l_pix: -3.9404e+01 
+2025-03-13 06:27:18,183 INFO: [EFNet..][epoch: 27, iter:  50,000, lr:(1.707e-04,1.709e-05,)] [eta: 14:59:53, time (data): 0.188 (0.002)] l_pix: -4.1179e+01 
+2025-03-13 06:43:02,894 INFO: Validation EFNet_highrev_single_deblur,		 # psnr: 34.8655	 # ssim: 0.9669
+2025-03-13 06:51:16,432 INFO: [EFNet..][epoch: 27, iter:  50,200, lr:(1.705e-04,1.706e-05,)] [eta: 15:19:56, time (data): 0.188 (0.002)] l_pix: -3.9424e+01 
+2025-03-13 07:00:11,817 INFO: [EFNet..][epoch: 27, iter:  50,400, lr:(1.703e-04,1.704e-05,)] [eta: 15:09:57, time (data): 1.651 (1.460)] l_pix: -4.1278e+01 
+2025-03-13 07:09:30,222 INFO: [EFNet..][epoch: 27, iter:  50,600, lr:(1.701e-04,1.702e-05,)] [eta: 15:00:42, time (data): 0.188 (0.002)] l_pix: -4.1106e+01 
+2025-03-13 07:18:02,088 INFO: [EFNet..][epoch: 28, iter:  50,800, lr:(1.698e-04,1.700e-05,)] [eta: 14:50:04, time (data): 3.200 (3.006)] l_pix: -3.8686e+01 
+2025-03-13 07:27:00,964 INFO: [EFNet..][epoch: 28, iter:  51,000, lr:(1.696e-04,1.697e-05,)] [eta: 14:40:18, time (data): 5.464 (5.270)] l_pix: -3.7068e+01 
+2025-03-13 07:35:49,743 INFO: [EFNet..][epoch: 28, iter:  51,200, lr:(1.694e-04,1.695e-05,)] [eta: 14:30:16, time (data): 6.479 (6.284)] l_pix: -4.0590e+01 
+2025-03-13 07:44:20,523 INFO: [EFNet..][epoch: 28, iter:  51,400, lr:(1.692e-04,1.693e-05,)] [eta: 14:19:48, time (data): 6.308 (6.113)] l_pix: -3.8647e+01 
+2025-03-13 07:53:39,704 INFO: [EFNet..][epoch: 28, iter:  51,600, lr:(1.689e-04,1.691e-05,)] [eta: 14:10:40, time (data): 0.188 (0.002)] l_pix: -3.8815e+01 
+2025-03-13 08:02:53,788 INFO: [EFNet..][epoch: 28, iter:  51,800, lr:(1.687e-04,1.688e-05,)] [eta: 14:01:24, time (data): 0.189 (0.002)] l_pix: -3.5234e+01 
+2025-03-13 08:11:45,437 INFO: [EFNet..][epoch: 28, iter:  52,000, lr:(1.685e-04,1.686e-05,)] [eta: 13:51:34, time (data): 0.188 (0.002)] l_pix: -3.8680e+01 
+2025-03-13 08:20:19,926 INFO: [EFNet..][epoch: 28, iter:  52,200, lr:(1.682e-04,1.684e-05,)] [eta: 13:41:22, time (data): 0.190 (0.002)] l_pix: -3.6537e+01 
+2025-03-13 08:29:05,813 INFO: [EFNet..][epoch: 29, iter:  52,400, lr:(1.680e-04,1.682e-05,)] [eta: 13:31:28, time (data): 0.188 (0.002)] l_pix: -3.9432e+01 
+2025-03-13 08:38:08,156 INFO: [EFNet..][epoch: 29, iter:  52,600, lr:(1.678e-04,1.679e-05,)] [eta: 13:22:00, time (data): 0.188 (0.002)] l_pix: -3.6741e+01 
+2025-03-13 08:46:22,339 INFO: [EFNet..][epoch: 29, iter:  52,800, lr:(1.676e-04,1.677e-05,)] [eta: 13:11:28, time (data): 7.933 (7.738)] l_pix: -3.8702e+01 
+2025-03-13 08:55:08,294 INFO: [EFNet..][epoch: 29, iter:  53,000, lr:(1.673e-04,1.675e-05,)] [eta: 13:01:41, time (data): 0.188 (0.002)] l_pix: -3.9597e+01 
+2025-03-13 09:03:28,934 INFO: [EFNet..][epoch: 29, iter:  53,200, lr:(1.671e-04,1.672e-05,)] [eta: 12:51:24, time (data): 0.370 (0.181)] l_pix: -3.6859e+01 
+2025-03-13 09:12:34,314 INFO: [EFNet..][epoch: 29, iter:  53,400, lr:(1.669e-04,1.670e-05,)] [eta: 12:42:06, time (data): 0.188 (0.002)] l_pix: -4.1951e+01 
+2025-03-13 09:20:48,875 INFO: [EFNet..][epoch: 29, iter:  53,600, lr:(1.666e-04,1.668e-05,)] [eta: 12:31:47, time (data): 7.774 (7.579)] l_pix: -3.7885e+01 
+2025-03-13 09:29:14,765 INFO: [EFNet..][epoch: 29, iter:  53,800, lr:(1.664e-04,1.665e-05,)] [eta: 12:21:45, time (data): 5.526 (5.331)] l_pix: -4.1411e+01 
+2025-03-13 09:37:59,790 INFO: [EFNet..][epoch: 29, iter:  54,000, lr:(1.661e-04,1.663e-05,)] [eta: 12:12:08, time (data): 0.188 (0.002)] l_pix: -3.7449e+01 
+2025-03-13 09:47:14,539 INFO: [EFNet..][epoch: 30, iter:  54,200, lr:(1.659e-04,1.661e-05,)] [eta: 12:03:05, time (data): 0.188 (0.002)] l_pix: -3.7296e+01 
+2025-03-13 09:56:36,340 INFO: [EFNet..][epoch: 30, iter:  54,400, lr:(1.657e-04,1.658e-05,)] [eta: 11:54:09, time (data): 7.166 (6.971)] l_pix: -4.3134e+01 
+2025-03-13 10:05:27,413 INFO: [EFNet..][epoch: 30, iter:  54,600, lr:(1.654e-04,1.656e-05,)] [eta: 11:44:40, time (data): 10.847 (10.653)] l_pix: -3.8315e+01 
+2025-03-13 10:14:13,302 INFO: [EFNet..][epoch: 30, iter:  54,800, lr:(1.652e-04,1.654e-05,)] [eta: 11:35:07, time (data): 0.192 (0.002)] l_pix: -3.7584e+01 
+2025-03-13 10:23:47,702 INFO: [EFNet..][epoch: 30, iter:  55,000, lr:(1.650e-04,1.651e-05,)] [eta: 11:26:24, time (data): 3.979 (3.786)] l_pix: -4.0876e+01 
+2025-03-13 10:32:35,812 INFO: [EFNet..][epoch: 30, iter:  55,200, lr:(1.647e-04,1.649e-05,)] [eta: 11:16:55, time (data): 0.188 (0.002)] l_pix: -3.5922e+01 
+2025-03-13 10:41:14,848 INFO: [EFNet..][epoch: 30, iter:  55,400, lr:(1.645e-04,1.646e-05,)] [eta: 11:07:17, time (data): 4.391 (4.197)] l_pix: -4.2276e+01 
+2025-03-13 10:50:17,724 INFO: [EFNet..][epoch: 30, iter:  55,600, lr:(1.642e-04,1.644e-05,)] [eta: 10:58:04, time (data): 0.908 (0.718)] l_pix: -4.1186e+01 
+2025-03-13 10:59:05,367 INFO: [EFNet..][epoch: 30, iter:  55,800, lr:(1.640e-04,1.642e-05,)] [eta: 10:48:37, time (data): 0.188 (0.002)] l_pix: -4.1295e+01 
+2025-03-13 11:08:13,224 INFO: [EFNet..][epoch: 31, iter:  56,000, lr:(1.638e-04,1.639e-05,)] [eta: 10:39:28, time (data): 5.734 (5.539)] l_pix: -3.3894e+01 
+2025-03-13 11:17:15,096 INFO: [EFNet..][epoch: 31, iter:  56,200, lr:(1.635e-04,1.637e-05,)] [eta: 10:30:15, time (data): 7.266 (7.072)] l_pix: -3.7231e+01 
+2025-03-13 11:27:09,601 INFO: [EFNet..][epoch: 31, iter:  56,400, lr:(1.633e-04,1.634e-05,)] [eta: 10:21:45, time (data): 0.190 (0.002)] l_pix: -4.2693e+01 
+2025-03-13 11:36:35,447 INFO: [EFNet..][epoch: 31, iter:  56,600, lr:(1.630e-04,1.632e-05,)] [eta: 10:12:50, time (data): 0.188 (0.002)] l_pix: -3.4784e+01 
+2025-03-13 11:45:58,301 INFO: [EFNet..][epoch: 31, iter:  56,800, lr:(1.628e-04,1.630e-05,)] [eta: 10:03:52, time (data): 0.188 (0.003)] l_pix: -4.1582e+01 
+2025-03-13 11:54:51,748 INFO: [EFNet..][epoch: 31, iter:  57,000, lr:(1.625e-04,1.627e-05,)] [eta: 9:54:31, time (data): 0.188 (0.002)] l_pix: -3.8959e+01 
+2025-03-13 12:03:46,166 INFO: [EFNet..][epoch: 31, iter:  57,200, lr:(1.623e-04,1.625e-05,)] [eta: 9:45:12, time (data): 0.188 (0.002)] l_pix: -3.8299e+01 
+2025-03-13 12:12:29,201 INFO: [EFNet..][epoch: 31, iter:  57,400, lr:(1.621e-04,1.622e-05,)] [eta: 9:35:45, time (data): 6.118 (5.925)] l_pix: -4.3542e+01 
+2025-03-13 12:21:12,625 INFO: [EFNet..][epoch: 31, iter:  57,600, lr:(1.618e-04,1.620e-05,)] [eta: 9:26:19, time (data): 5.053 (4.860)] l_pix: -3.8487e+01 
+2025-03-13 12:30:09,660 INFO: [EFNet..][epoch: 32, iter:  57,800, lr:(1.616e-04,1.617e-05,)] [eta: 9:17:03, time (data): 0.220 (0.032)] l_pix: -3.7678e+01 
+2025-03-13 12:38:59,382 INFO: [EFNet..][epoch: 32, iter:  58,000, lr:(1.613e-04,1.615e-05,)] [eta: 9:07:43, time (data): 0.188 (0.002)] l_pix: -3.8073e+01 
+2025-03-13 12:47:51,635 INFO: [EFNet..][epoch: 32, iter:  58,200, lr:(1.611e-04,1.612e-05,)] [eta: 8:58:25, time (data): 2.199 (2.004)] l_pix: -4.0957e+01 
+2025-03-13 12:56:47,054 INFO: [EFNet..][epoch: 32, iter:  58,400, lr:(1.608e-04,1.610e-05,)] [eta: 8:49:10, time (data): 0.189 (0.002)] l_pix: -3.8292e+01 
+2025-03-13 13:05:46,242 INFO: [EFNet..][epoch: 32, iter:  58,600, lr:(1.606e-04,1.607e-05,)] [eta: 8:39:57, time (data): 0.188 (0.002)] l_pix: -3.8372e+01 
+2025-03-13 13:14:45,526 INFO: [EFNet..][epoch: 32, iter:  58,800, lr:(1.603e-04,1.605e-05,)] [eta: 8:30:45, time (data): 3.738 (3.544)] l_pix: -4.3560e+01 
+2025-03-13 13:23:33,963 INFO: [EFNet..][epoch: 32, iter:  59,000, lr:(1.601e-04,1.602e-05,)] [eta: 8:21:27, time (data): 4.701 (4.507)] l_pix: -3.8745e+01 
+2025-03-13 13:32:00,054 INFO: [EFNet..][epoch: 32, iter:  59,200, lr:(1.598e-04,1.600e-05,)] [eta: 8:11:57, time (data): 7.217 (7.021)] l_pix: -3.7240e+01 
+2025-03-13 13:41:28,713 INFO: [EFNet..][epoch: 32, iter:  59,400, lr:(1.596e-04,1.597e-05,)] [eta: 8:03:02, time (data): 9.974 (9.779)] l_pix: -4.0096e+01 
+2025-03-13 13:50:09,550 INFO: [EFNet..][epoch: 33, iter:  59,600, lr:(1.593e-04,1.595e-05,)] [eta: 7:53:41, time (data): 1.093 (0.902)] l_pix: -4.0182e+01 
+2025-03-13 13:59:44,555 INFO: [EFNet..][epoch: 33, iter:  59,800, lr:(1.591e-04,1.592e-05,)] [eta: 7:44:49, time (data): 3.950 (3.754)] l_pix: -4.4760e+01 
+2025-03-13 14:08:45,026 INFO: [EFNet..][epoch: 33, iter:  60,000, lr:(1.588e-04,1.590e-05,)] [eta: 7:35:39, time (data): 0.189 (0.002)] l_pix: -3.9005e+01 
+2025-03-13 14:08:45,026 INFO: Saving models and training states.
+2025-03-13 14:24:39,523 INFO: Validation EFNet_highrev_single_deblur,		 # psnr: 34.7968	 # ssim: 0.9664
+2025-03-13 14:33:07,662 INFO: [EFNet..][epoch: 33, iter:  60,200, lr:(1.585e-04,1.587e-05,)] [eta: 7:33:57, time (data): 0.231 (0.043)] l_pix: -3.8510e+01 
+2025-03-13 14:41:48,832 INFO: [EFNet..][epoch: 33, iter:  60,400, lr:(1.583e-04,1.585e-05,)] [eta: 7:24:24, time (data): 9.160 (8.965)] l_pix: -4.0056e+01 
+2025-03-13 14:50:20,382 INFO: [EFNet..][epoch: 33, iter:  60,600, lr:(1.580e-04,1.582e-05,)] [eta: 7:14:49, time (data): 0.192 (0.004)] l_pix: -3.6870e+01 
+2025-03-13 14:59:31,544 INFO: [EFNet..][epoch: 33, iter:  60,800, lr:(1.578e-04,1.580e-05,)] [eta: 7:05:32, time (data): 5.015 (4.821)] l_pix: -3.9807e+01 
+2025-03-13 15:08:11,985 INFO: [EFNet..][epoch: 33, iter:  61,000, lr:(1.575e-04,1.577e-05,)] [eta: 6:56:02, time (data): 0.188 (0.002)] l_pix: -4.0001e+01 
+2025-03-13 15:17:18,866 INFO: [EFNet..][epoch: 33, iter:  61,200, lr:(1.573e-04,1.575e-05,)] [eta: 6:46:44, time (data): 0.188 (0.002)] l_pix: -3.6426e+01 
+2025-03-13 15:25:44,667 INFO: [EFNet..][epoch: 34, iter:  61,400, lr:(1.570e-04,1.572e-05,)] [eta: 6:37:09, time (data): 2.148 (1.953)] l_pix: -4.0465e+01 
+2025-03-13 15:34:08,075 INFO: [EFNet..][epoch: 34, iter:  61,600, lr:(1.567e-04,1.569e-05,)] [eta: 6:27:35, time (data): 0.188 (0.002)] l_pix: -3.8540e+01 
+2025-03-13 15:43:32,634 INFO: [EFNet..][epoch: 34, iter:  61,800, lr:(1.565e-04,1.567e-05,)] [eta: 6:18:26, time (data): 0.189 (0.002)] l_pix: -3.6561e+01 
+2025-03-13 15:52:43,521 INFO: [EFNet..][epoch: 34, iter:  62,000, lr:(1.562e-04,1.564e-05,)] [eta: 6:09:11, time (data): 0.188 (0.002)] l_pix: -3.8632e+01 
+2025-03-13 16:01:30,494 INFO: [EFNet..][epoch: 34, iter:  62,200, lr:(1.560e-04,1.562e-05,)] [eta: 5:59:47, time (data): 0.188 (0.002)] l_pix: -4.0166e+01 
+2025-03-13 16:09:58,724 INFO: [EFNet..][epoch: 34, iter:  62,400, lr:(1.557e-04,1.559e-05,)] [eta: 5:50:18, time (data): 2.569 (2.377)] l_pix: -3.7982e+01 
+2025-03-13 16:19:28,828 INFO: [EFNet..][epoch: 34, iter:  62,600, lr:(1.554e-04,1.557e-05,)] [eta: 5:41:11, time (data): 6.948 (6.754)] l_pix: -4.2020e+01 
+2025-03-13 16:28:07,408 INFO: [EFNet..][epoch: 34, iter:  62,800, lr:(1.552e-04,1.554e-05,)] [eta: 5:31:46, time (data): 7.842 (7.649)] l_pix: -3.8481e+01 
+2025-03-13 16:37:34,712 INFO: [EFNet..][epoch: 34, iter:  63,000, lr:(1.549e-04,1.551e-05,)] [eta: 5:22:38, time (data): 5.879 (5.684)] l_pix: -3.6726e+01 
+2025-03-13 16:46:37,800 INFO: [EFNet..][epoch: 35, iter:  63,200, lr:(1.547e-04,1.549e-05,)] [eta: 5:13:22, time (data): 0.189 (0.002)] l_pix: -3.7544e+01 
+2025-03-13 16:54:58,817 INFO: [EFNet..][epoch: 35, iter:  63,400, lr:(1.544e-04,1.546e-05,)] [eta: 5:03:54, time (data): 3.144 (2.949)] l_pix: -4.1945e+01 
+2025-03-13 17:03:39,819 INFO: [EFNet..][epoch: 35, iter:  63,600, lr:(1.541e-04,1.543e-05,)] [eta: 4:54:33, time (data): 0.190 (0.002)] l_pix: -3.8173e+01 
+2025-03-13 17:13:07,754 INFO: [EFNet..][epoch: 35, iter:  63,800, lr:(1.539e-04,1.541e-05,)] [eta: 4:45:24, time (data): 0.188 (0.002)] l_pix: -3.9414e+01 
+2025-03-13 17:21:50,244 INFO: [EFNet..][epoch: 35, iter:  64,000, lr:(1.536e-04,1.538e-05,)] [eta: 4:36:04, time (data): 0.188 (0.002)] l_pix: -3.8988e+01 
+2025-03-13 17:30:59,632 INFO: [EFNet..][epoch: 35, iter:  64,200, lr:(1.533e-04,1.536e-05,)] [eta: 4:26:51, time (data): 5.918 (5.722)] l_pix: -4.2107e+01 
+2025-03-13 17:39:42,159 INFO: [EFNet..][epoch: 35, iter:  64,400, lr:(1.531e-04,1.533e-05,)] [eta: 4:17:32, time (data): 0.190 (0.002)] l_pix: -3.5193e+01 
+2025-03-13 17:49:14,256 INFO: [EFNet..][epoch: 35, iter:  64,600, lr:(1.528e-04,1.530e-05,)] [eta: 4:08:25, time (data): 6.413 (6.220)] l_pix: -3.9967e+01 
+2025-03-13 17:57:40,279 INFO: [EFNet..][epoch: 36, iter:  64,800, lr:(1.525e-04,1.528e-05,)] [eta: 3:59:03, time (data): 8.425 (8.228)] l_pix: -4.1437e+01 
+2025-03-13 18:07:49,656 INFO: [EFNet..][epoch: 36, iter:  65,000, lr:(1.523e-04,1.525e-05,)] [eta: 3:50:03, time (data): 0.188 (0.002)] l_pix: -3.5786e+01 
+2025-03-13 18:17:00,938 INFO: [EFNet..][epoch: 36, iter:  65,200, lr:(1.520e-04,1.522e-05,)] [eta: 3:40:50, time (data): 0.190 (0.002)] l_pix: -4.1186e+01 
+2025-03-13 18:26:26,090 INFO: [EFNet..][epoch: 36, iter:  65,400, lr:(1.517e-04,1.520e-05,)] [eta: 3:31:40, time (data): 0.189 (0.002)] l_pix: -3.3194e+01 
+2025-03-13 18:34:48,978 INFO: [EFNet..][epoch: 36, iter:  65,600, lr:(1.515e-04,1.517e-05,)] [eta: 3:22:19, time (data): 3.645 (3.452)] l_pix: -4.2251e+01 
+2025-03-13 18:44:13,141 INFO: [EFNet..][epoch: 36, iter:  65,800, lr:(1.512e-04,1.514e-05,)] [eta: 3:13:10, time (data): 0.191 (0.002)] l_pix: -3.8493e+01 
+2025-03-13 18:53:05,233 INFO: [EFNet..][epoch: 36, iter:  66,000, lr:(1.509e-04,1.512e-05,)] [eta: 3:03:54, time (data): 5.208 (5.013)] l_pix: -4.0602e+01 
+2025-03-13 19:02:11,950 INFO: [EFNet..][epoch: 36, iter:  66,200, lr:(1.507e-04,1.509e-05,)] [eta: 2:54:42, time (data): 0.189 (0.002)] l_pix: -4.1777e+01 
+2025-03-13 19:11:51,689 INFO: [EFNet..][epoch: 36, iter:  66,400, lr:(1.504e-04,1.506e-05,)] [eta: 2:45:34, time (data): 0.188 (0.002)] l_pix: -4.1202e+01 
+2025-03-13 19:20:35,867 INFO: [EFNet..][epoch: 37, iter:  66,600, lr:(1.501e-04,1.503e-05,)] [eta: 2:36:18, time (data): 0.190 (0.002)] l_pix: -4.0874e+01 
+2025-03-13 19:30:16,642 INFO: [EFNet..][epoch: 37, iter:  66,800, lr:(1.498e-04,1.501e-05,)] [eta: 2:27:10, time (data): 12.056 (11.861)] l_pix: -4.0258e+01 
+2025-03-13 19:39:36,432 INFO: [EFNet..][epoch: 37, iter:  67,000, lr:(1.496e-04,1.498e-05,)] [eta: 2:17:59, time (data): 0.191 (0.002)] l_pix: -3.9403e+01 
+2025-03-13 19:49:06,801 INFO: [EFNet..][epoch: 37, iter:  67,200, lr:(1.493e-04,1.495e-05,)] [eta: 2:08:48, time (data): 0.188 (0.002)] l_pix: -3.9311e+01 
+2025-03-13 19:58:31,418 INFO: [EFNet..][epoch: 37, iter:  67,400, lr:(1.490e-04,1.493e-05,)] [eta: 1:59:37, time (data): 0.188 (0.002)] l_pix: -4.1348e+01 
+2025-03-13 20:07:00,641 INFO: [EFNet..][epoch: 37, iter:  67,600, lr:(1.488e-04,1.490e-05,)] [eta: 1:50:21, time (data): 1.194 (1.004)] l_pix: -4.2311e+01 
+2025-03-13 20:15:45,418 INFO: [EFNet..][epoch: 37, iter:  67,800, lr:(1.485e-04,1.487e-05,)] [eta: 1:41:07, time (data): 0.189 (0.002)] l_pix: -4.0072e+01 
+2025-03-13 20:24:33,153 INFO: [EFNet..][epoch: 37, iter:  68,000, lr:(1.482e-04,1.484e-05,)] [eta: 1:31:53, time (data): 0.189 (0.002)] l_pix: -3.7351e+01 
+2025-03-13 20:33:31,468 INFO: [EFNet..][epoch: 37, iter:  68,200, lr:(1.479e-04,1.482e-05,)] [eta: 1:22:41, time (data): 6.267 (6.072)] l_pix: -4.0836e+01 
+2025-03-13 20:42:47,583 INFO: [EFNet..][epoch: 38, iter:  68,400, lr:(1.477e-04,1.479e-05,)] [eta: 1:13:30, time (data): 3.549 (3.354)] l_pix: -4.3253e+01 
+2025-03-13 20:51:51,827 INFO: [EFNet..][epoch: 38, iter:  68,600, lr:(1.474e-04,1.476e-05,)] [eta: 1:04:18, time (data): 5.487 (5.293)] l_pix: -3.7944e+01 
+2025-03-13 21:01:04,819 INFO: [EFNet..][epoch: 38, iter:  68,800, lr:(1.471e-04,1.473e-05,)] [eta: 0:55:06, time (data): 10.426 (10.230)] l_pix: -3.6985e+01 
+2025-03-13 21:10:03,458 INFO: [EFNet..][epoch: 38, iter:  69,000, lr:(1.468e-04,1.471e-05,)] [eta: 0:45:54, time (data): 0.188 (0.002)] l_pix: -4.0589e+01 
+2025-03-13 21:18:43,333 INFO: [EFNet..][epoch: 38, iter:  69,200, lr:(1.465e-04,1.468e-05,)] [eta: 0:36:42, time (data): 6.503 (6.308)] l_pix: -4.5058e+01 
+2025-03-13 21:27:26,817 INFO: [EFNet..][epoch: 38, iter:  69,400, lr:(1.463e-04,1.465e-05,)] [eta: 0:27:30, time (data): 0.191 (0.003)] l_pix: -3.8986e+01 
+2025-03-13 21:36:40,117 INFO: [EFNet..][epoch: 38, iter:  69,600, lr:(1.460e-04,1.462e-05,)] [eta: 0:18:19, time (data): 0.188 (0.002)] l_pix: -4.1216e+01 
+2025-03-13 21:45:29,597 INFO: [EFNet..][epoch: 38, iter:  69,800, lr:(1.457e-04,1.460e-05,)] [eta: 0:09:08, time (data): 0.188 (0.002)] l_pix: -3.7185e+01 
+2025-03-13 21:54:21,511 INFO: [EFNet..][epoch: 38, iter:  70,000, lr:(1.454e-04,1.457e-05,)] [eta: -1 day, 23:59:58, time (data): 6.576 (6.381)] l_pix: -4.0204e+01 
+2025-03-13 22:10:19,727 INFO: Validation EFNet_highrev_single_deblur,		 # psnr: 35.0021	 # ssim: 0.9673
+2025-03-13 22:10:19,740 INFO: End of training. Time consumed: 23:13:02
+2025-03-13 22:10:19,740 INFO: Save the latest model.
+2025-03-13 22:26:13,572 INFO: Validation EFNet_highrev_single_deblur,		 # psnr: 35.0021	 # ssim: 0.9673

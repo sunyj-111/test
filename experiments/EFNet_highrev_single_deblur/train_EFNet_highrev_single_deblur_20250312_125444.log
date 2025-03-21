@@ -1,0 +1,446 @@
+2025-03-12 12:54:44,346 INFO: 
+                ____                _       _____  ____
+               / __ ) ____ _ _____ (_)_____/ ___/ / __ \
+              / __  |/ __ `// ___// // ___/\__ \ / /_/ /
+             / /_/ // /_/ /(__  )/ // /__ ___/ // _, _/
+            /_____/ \__,_//____//_/ \___//____//_/ |_|
+     ______                   __   __                 __      __
+    / ____/____   ____   ____/ /  / /   __  __ _____ / /__   / /
+   / / __ / __ \ / __ \ / __  /  / /   / / / // ___// //_/  / /
+  / /_/ // /_/ // /_/ // /_/ /  / /___/ /_/ // /__ / /<    /_/
+  \____/ \____/ \____/ \____/  /_____/\____/ \___//_/|_|  (_)
+    
+Version Information: 
+	BasicSR: 1.2.0+ac1e6b0
+	PyTorch: 2.3.0+cu121
+	TorchVision: 0.18.0+cu121
+2025-03-12 12:54:44,347 INFO: 
+  name: EFNet_highrev_single_deblur
+  model_type: ImageEventRestorationModel
+  scale: 1
+  num_gpu: 1
+  manual_seed: 10
+  datasets:[
+    train:[
+      name: highrev-train
+      type: NpzPngSingleDeblurDataset
+      dataroot: ./datasets/HighREV/train
+      voxel_bins: 6
+      gt_size: 256
+      norm_voxel: True
+      use_hflip: True
+      use_rot: True
+      filename_tmpl: {}
+      io_backend:[
+        type: disk
+      ]
+      use_shuffle: True
+      num_worker_per_gpu: 3
+      batch_size_per_gpu: 4
+      dataset_enlarge_ratio: 4
+      prefetch_mode: cpu
+      num_prefetch_queue: 2
+      phase: train
+      scale: 1
+    ]
+    val:[
+      name: highrev-val
+      type: NpzPngSingleDeblurDataset
+      voxel_bins: 6
+      dataroot: /root/autodl-tmp/NTIRE2025_EventDeblur_challenge-main/datasets/HighREV/val
+      gt_size: None
+      norm_voxel: True
+      io_backend:[
+        type: disk
+      ]
+      use_hflip: False
+      use_rot: False
+      phase: val
+      scale: 1
+    ]
+  ]
+  dataset_name: HighREV
+  network_g:[
+    type: EFNet
+    wf: 64
+    fuse_before_downsample: True
+  ]
+  path:[
+    pretrain_network_g: None
+    strict_load_g: True
+    resume_state: experiments/EFNet_highrev_single_deblur/training_states/40000.state
+    training_states: /root/autodl-tmp/NTIRE2025_EventDeblur_challenge-main/experiments/EFNet_highrev_single_deblur/training_states
+    root: /root/autodl-tmp/NTIRE2025_EventDeblur_challenge-main
+    experiments_root: /root/autodl-tmp/NTIRE2025_EventDeblur_challenge-main/experiments/EFNet_highrev_single_deblur
+    models: /root/autodl-tmp/NTIRE2025_EventDeblur_challenge-main/experiments/EFNet_highrev_single_deblur/models
+    log: /root/autodl-tmp/NTIRE2025_EventDeblur_challenge-main/experiments/EFNet_highrev_single_deblur
+    visualization: /root/autodl-tmp/NTIRE2025_EventDeblur_challenge-main/experiments/EFNet_highrev_single_deblur/visualization
+  ]
+  train:[
+    optim_g:[
+      type: AdamW
+      lr: 0.0002
+      weight_decay: 0.0001
+      betas: [0.9, 0.99]
+    ]
+    scheduler:[
+      type: TrueCosineAnnealingLR
+      T_max: 200000
+      eta_min: 1e-07
+    ]
+    total_iter: 50000
+    warmup_iter: -1
+    pixel_opt:[
+      type: PSNRLoss
+      loss_weight: 0.5
+      reduction: mean
+    ]
+  ]
+  val:[
+    val_freq: 10000
+    save_img: False
+    grids: None
+    crop_size: None
+    max_minibatch: 8
+    metrics:[
+      psnr:[
+        type: calculate_psnr
+        crop_border: 0
+        test_y_channel: False
+      ]
+      ssim:[
+        type: calculate_ssim
+        crop_border: 0
+        test_y_channel: False
+      ]
+    ]
+  ]
+  logger:[
+    print_freq: 200
+    save_checkpoint_freq: 20000.0
+    use_tb_logger: True
+  ]
+  dist_params:[
+    backend: nccl
+    port: 29500
+  ]
+  is_train: True
+  dist: False
+  rank: 0
+  world_size: 1
+
+2025-03-12 12:55:20,424 INFO: Dataset initialized with 1771 samples.
+2025-03-12 12:55:20,424 INFO: Dataset NpzPngSingleDeblurDataset - highrev-train is created.
+2025-03-12 12:55:20,425 INFO: Use cpu prefetch dataloader: num_prefetch_queue = 2
+2025-03-12 12:55:20,425 INFO: Training statistics:
+	Number of train images: 1771
+	Dataset enlarge ratio: 4
+	Batch size per gpu: 4
+	World size (gpu number): 1
+	Require iter number per epoch: 1771
+	Total epochs: 29; iters: 50000.
+2025-03-12 12:55:22,472 INFO: Dataset initialized with 421 samples.
+2025-03-12 12:55:22,472 INFO: Dataset NpzPngSingleDeblurDataset - highrev-val is created.
+2025-03-12 12:55:22,472 INFO: Number of val images/folders in highrev-val: 421
+2025-03-12 12:55:22,473 INFO: Set pretrain_network_g to /root/autodl-tmp/NTIRE2025_EventDeblur_challenge-main/experiments/EFNet_highrev_single_deblur/models/net_g_40000.pth
+2025-03-12 12:55:22,609 INFO: Network: EFNet, with parameters: 11,438,592
+2025-03-12 12:55:22,609 INFO: EFNet(
+  (down_path_1): ModuleList(
+    (0): UNetConvBlock(
+      (identity): Conv2d(64, 64, kernel_size=(1, 1), stride=(1, 1))
+      (conv_1): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+      (relu_1): LeakyReLU(negative_slope=0.2)
+      (conv_2): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+      (relu_2): LeakyReLU(negative_slope=0.2)
+      (downsample): Conv2d(64, 64, kernel_size=(4, 4), stride=(2, 2), padding=(1, 1), bias=False)
+      (image_event_transformer): EventImage_ChannelAttentionTransformerBlock(
+        (norm1_image): LayerNorm(
+          (body): WithBias_LayerNorm()
+        )
+        (norm1_event): LayerNorm(
+          (body): WithBias_LayerNorm()
+        )
+        (attn): Mutual_Attention(
+          (q_image): Conv2d(64, 64, kernel_size=(1, 1), stride=(1, 1), bias=False)
+          (kv_event): Conv2d(64, 128, kernel_size=(1, 1), stride=(1, 1), bias=False)
+          (q_event): Conv2d(64, 64, kernel_size=(1, 1), stride=(1, 1), bias=False)
+          (kv_image): Conv2d(64, 128, kernel_size=(1, 1), stride=(1, 1), bias=False)
+          (proj_out): Conv2d(64, 64, kernel_size=(1, 1), stride=(1, 1), bias=False)
+        )
+        (norm2): LayerNorm((64,), eps=1e-05, elementwise_affine=True)
+        (ffn): Mlp(
+          (fc1): Linear(in_features=64, out_features=256, bias=True)
+          (act): GELU(approximate='none')
+          (fc2): Linear(in_features=256, out_features=64, bias=True)
+          (drop): Dropout(p=0.0, inplace=False)
+        )
+      )
+    )
+    (1): UNetConvBlock(
+      (identity): Conv2d(64, 128, kernel_size=(1, 1), stride=(1, 1))
+      (conv_1): Conv2d(64, 128, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+      (relu_1): LeakyReLU(negative_slope=0.2)
+      (conv_2): Conv2d(128, 128, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+      (relu_2): LeakyReLU(negative_slope=0.2)
+      (downsample): Conv2d(128, 128, kernel_size=(4, 4), stride=(2, 2), padding=(1, 1), bias=False)
+      (image_event_transformer): EventImage_ChannelAttentionTransformerBlock(
+        (norm1_image): LayerNorm(
+          (body): WithBias_LayerNorm()
+        )
+        (norm1_event): LayerNorm(
+          (body): WithBias_LayerNorm()
+        )
+        (attn): Mutual_Attention(
+          (q_image): Conv2d(128, 128, kernel_size=(1, 1), stride=(1, 1), bias=False)
+          (kv_event): Conv2d(128, 256, kernel_size=(1, 1), stride=(1, 1), bias=False)
+          (q_event): Conv2d(128, 128, kernel_size=(1, 1), stride=(1, 1), bias=False)
+          (kv_image): Conv2d(128, 256, kernel_size=(1, 1), stride=(1, 1), bias=False)
+          (proj_out): Conv2d(128, 128, kernel_size=(1, 1), stride=(1, 1), bias=False)
+        )
+        (norm2): LayerNorm((128,), eps=1e-05, elementwise_affine=True)
+        (ffn): Mlp(
+          (fc1): Linear(in_features=128, out_features=512, bias=True)
+          (act): GELU(approximate='none')
+          (fc2): Linear(in_features=512, out_features=128, bias=True)
+          (drop): Dropout(p=0.0, inplace=False)
+        )
+      )
+    )
+    (2): UNetConvBlock(
+      (identity): Conv2d(128, 256, kernel_size=(1, 1), stride=(1, 1))
+      (conv_1): Conv2d(128, 256, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+      (relu_1): LeakyReLU(negative_slope=0.2)
+      (conv_2): Conv2d(256, 256, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+      (relu_2): LeakyReLU(negative_slope=0.2)
+      (image_event_transformer): EventImage_ChannelAttentionTransformerBlock(
+        (norm1_image): LayerNorm(
+          (body): WithBias_LayerNorm()
+        )
+        (norm1_event): LayerNorm(
+          (body): WithBias_LayerNorm()
+        )
+        (attn): Mutual_Attention(
+          (q_image): Conv2d(256, 256, kernel_size=(1, 1), stride=(1, 1), bias=False)
+          (kv_event): Conv2d(256, 512, kernel_size=(1, 1), stride=(1, 1), bias=False)
+          (q_event): Conv2d(256, 256, kernel_size=(1, 1), stride=(1, 1), bias=False)
+          (kv_image): Conv2d(256, 512, kernel_size=(1, 1), stride=(1, 1), bias=False)
+          (proj_out): Conv2d(256, 256, kernel_size=(1, 1), stride=(1, 1), bias=False)
+        )
+        (norm2): LayerNorm((256,), eps=1e-05, elementwise_affine=True)
+        (ffn): Mlp(
+          (fc1): Linear(in_features=256, out_features=1024, bias=True)
+          (act): GELU(approximate='none')
+          (fc2): Linear(in_features=1024, out_features=256, bias=True)
+          (drop): Dropout(p=0.0, inplace=False)
+        )
+      )
+    )
+  )
+  (down_path_2): ModuleList(
+    (0): UNetConvBlock(
+      (identity): Conv2d(64, 64, kernel_size=(1, 1), stride=(1, 1))
+      (conv_1): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+      (relu_1): LeakyReLU(negative_slope=0.2)
+      (conv_2): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+      (relu_2): LeakyReLU(negative_slope=0.2)
+      (emgc_enc): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+      (emgc_dec): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+      (emgc_enc_mask): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+      (emgc_dec_mask): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+      (downsample): Conv2d(64, 64, kernel_size=(4, 4), stride=(2, 2), padding=(1, 1), bias=False)
+    )
+    (1): UNetConvBlock(
+      (identity): Conv2d(64, 128, kernel_size=(1, 1), stride=(1, 1))
+      (conv_1): Conv2d(64, 128, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+      (relu_1): LeakyReLU(negative_slope=0.2)
+      (conv_2): Conv2d(128, 128, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+      (relu_2): LeakyReLU(negative_slope=0.2)
+      (emgc_enc): Conv2d(128, 128, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+      (emgc_dec): Conv2d(128, 128, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+      (emgc_enc_mask): Conv2d(128, 128, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+      (emgc_dec_mask): Conv2d(128, 128, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+      (downsample): Conv2d(128, 128, kernel_size=(4, 4), stride=(2, 2), padding=(1, 1), bias=False)
+    )
+    (2): UNetConvBlock(
+      (identity): Conv2d(128, 256, kernel_size=(1, 1), stride=(1, 1))
+      (conv_1): Conv2d(128, 256, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+      (relu_1): LeakyReLU(negative_slope=0.2)
+      (conv_2): Conv2d(256, 256, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+      (relu_2): LeakyReLU(negative_slope=0.2)
+    )
+  )
+  (conv_01): Conv2d(3, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+  (conv_02): Conv2d(3, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+  (down_path_ev): ModuleList(
+    (0): UNetEVConvBlock(
+      (identity): Conv2d(64, 64, kernel_size=(1, 1), stride=(1, 1))
+      (conv_1): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+      (relu_1): LeakyReLU(negative_slope=0.2)
+      (conv_2): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+      (relu_2): LeakyReLU(negative_slope=0.2)
+      (conv_before_merge): Conv2d(64, 64, kernel_size=(1, 1), stride=(1, 1))
+      (downsample): Conv2d(64, 64, kernel_size=(4, 4), stride=(2, 2), padding=(1, 1), bias=False)
+    )
+    (1): UNetEVConvBlock(
+      (identity): Conv2d(64, 128, kernel_size=(1, 1), stride=(1, 1))
+      (conv_1): Conv2d(64, 128, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+      (relu_1): LeakyReLU(negative_slope=0.2)
+      (conv_2): Conv2d(128, 128, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+      (relu_2): LeakyReLU(negative_slope=0.2)
+      (conv_before_merge): Conv2d(128, 128, kernel_size=(1, 1), stride=(1, 1))
+      (downsample): Conv2d(128, 128, kernel_size=(4, 4), stride=(2, 2), padding=(1, 1), bias=False)
+    )
+    (2): UNetEVConvBlock(
+      (identity): Conv2d(128, 256, kernel_size=(1, 1), stride=(1, 1))
+      (conv_1): Conv2d(128, 256, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+      (relu_1): LeakyReLU(negative_slope=0.2)
+      (conv_2): Conv2d(256, 256, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+      (relu_2): LeakyReLU(negative_slope=0.2)
+      (conv_before_merge): Conv2d(256, 256, kernel_size=(1, 1), stride=(1, 1))
+    )
+  )
+  (conv_ev1): Conv2d(6, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+  (dynamic_fusion_modules): ModuleList(
+    (0): EventDynamicConv(
+      (dynamic_kernel_generator): Sequential(
+        (0): Conv2d(64, 16, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+        (1): ReLU(inplace=True)
+        (2): Conv2d(16, 576, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+      )
+      (static_conv): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+    )
+    (1): EventDynamicConv(
+      (dynamic_kernel_generator): Sequential(
+        (0): Conv2d(128, 32, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+        (1): ReLU(inplace=True)
+        (2): Conv2d(32, 1152, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+      )
+      (static_conv): Conv2d(128, 128, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+    )
+    (2): EventDynamicConv(
+      (dynamic_kernel_generator): Sequential(
+        (0): Conv2d(256, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+        (1): ReLU(inplace=True)
+        (2): Conv2d(64, 2304, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+      )
+      (static_conv): Conv2d(256, 256, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+    )
+  )
+  (up_path_1): ModuleList(
+    (0): UNetUpBlock(
+      (up): ConvTranspose2d(256, 128, kernel_size=(2, 2), stride=(2, 2))
+      (conv_block): UNetConvBlock(
+        (identity): Conv2d(256, 128, kernel_size=(1, 1), stride=(1, 1))
+        (conv_1): Conv2d(256, 128, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+        (relu_1): LeakyReLU(negative_slope=0.2)
+        (conv_2): Conv2d(128, 128, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+        (relu_2): LeakyReLU(negative_slope=0.2)
+      )
+    )
+    (1): UNetUpBlock(
+      (up): ConvTranspose2d(128, 64, kernel_size=(2, 2), stride=(2, 2))
+      (conv_block): UNetConvBlock(
+        (identity): Conv2d(128, 64, kernel_size=(1, 1), stride=(1, 1))
+        (conv_1): Conv2d(128, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+        (relu_1): LeakyReLU(negative_slope=0.2)
+        (conv_2): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+        (relu_2): LeakyReLU(negative_slope=0.2)
+      )
+    )
+  )
+  (up_path_2): ModuleList(
+    (0): UNetUpBlock(
+      (up): ConvTranspose2d(256, 128, kernel_size=(2, 2), stride=(2, 2))
+      (conv_block): UNetConvBlock(
+        (identity): Conv2d(256, 128, kernel_size=(1, 1), stride=(1, 1))
+        (conv_1): Conv2d(256, 128, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+        (relu_1): LeakyReLU(negative_slope=0.2)
+        (conv_2): Conv2d(128, 128, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+        (relu_2): LeakyReLU(negative_slope=0.2)
+      )
+    )
+    (1): UNetUpBlock(
+      (up): ConvTranspose2d(128, 64, kernel_size=(2, 2), stride=(2, 2))
+      (conv_block): UNetConvBlock(
+        (identity): Conv2d(128, 64, kernel_size=(1, 1), stride=(1, 1))
+        (conv_1): Conv2d(128, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+        (relu_1): LeakyReLU(negative_slope=0.2)
+        (conv_2): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+        (relu_2): LeakyReLU(negative_slope=0.2)
+      )
+    )
+  )
+  (skip_conv_1): ModuleList(
+    (0): Conv2d(128, 128, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+    (1): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+  )
+  (skip_conv_2): ModuleList(
+    (0): Conv2d(128, 128, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+    (1): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+  )
+  (sam12): SAM(
+    (conv1): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+    (conv2): Conv2d(64, 3, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+    (conv3): Conv2d(3, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+  )
+  (cat12): Conv2d(128, 64, kernel_size=(1, 1), stride=(1, 1))
+  (last): Conv2d(64, 3, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+)
+2025-03-12 12:55:22,609 INFO: Loading EFNet model from /root/autodl-tmp/NTIRE2025_EventDeblur_challenge-main/experiments/EFNet_highrev_single_deblur/models/net_g_40000.pth.
+2025-03-12 12:55:22,678 INFO: Model [ImageEventRestorationModel] is created.
+2025-03-12 12:55:22,680 INFO: Resuming training from epoch: 22, iter: 40000.
+2025-03-12 12:55:22,712 INFO: Start training from epoch: 22, iter: 40000
+2025-03-12 13:04:58,793 INFO: [EFNet..][epoch: 22, iter:  40,200, lr:(1.807e-04,1.808e-05,)] [eta: 7:48:06, time (data): 0.188 (0.002)] l_pix: -3.7905e+01 
+2025-03-12 13:14:19,193 INFO: [EFNet..][epoch: 22, iter:  40,400, lr:(1.805e-04,1.806e-05,)] [eta: 7:33:25, time (data): 0.189 (0.002)] l_pix: -3.6899e+01 
+2025-03-12 13:22:52,543 INFO: [EFNet..][epoch: 22, iter:  40,600, lr:(1.804e-04,1.804e-05,)] [eta: 7:10:02, time (data): 3.643 (3.448)] l_pix: -3.6437e+01 
+2025-03-12 13:32:16,212 INFO: [EFNet..][epoch: 22, iter:  40,800, lr:(1.802e-04,1.803e-05,)] [eta: 7:03:41, time (data): 0.193 (0.002)] l_pix: -4.5016e+01 
+2025-03-12 13:41:12,905 INFO: [EFNet..][epoch: 22, iter:  41,000, lr:(1.800e-04,1.801e-05,)] [eta: 6:52:04, time (data): 5.467 (5.271)] l_pix: -4.0655e+01 
+2025-03-12 13:49:59,927 INFO: [EFNet..][epoch: 22, iter:  41,200, lr:(1.798e-04,1.799e-05,)] [eta: 6:40:10, time (data): 0.191 (0.003)] l_pix: -4.2454e+01 
+2025-03-12 13:59:22,847 INFO: [EFNet..][epoch: 22, iter:  41,400, lr:(1.796e-04,1.797e-05,)] [eta: 6:32:50, time (data): 1.888 (1.694)] l_pix: -3.7646e+01 
+2025-03-12 14:08:25,828 INFO: [EFNet..][epoch: 22, iter:  41,600, lr:(1.794e-04,1.795e-05,)] [eta: 6:23:14, time (data): 0.189 (0.002)] l_pix: -4.0442e+01 
+2025-03-12 14:18:36,895 INFO: [EFNet..][epoch: 23, iter:  41,800, lr:(1.792e-04,1.793e-05,)] [eta: 6:18:56, time (data): 0.189 (0.002)] l_pix: -3.9290e+01 
+2025-03-12 14:27:06,365 INFO: [EFNet..][epoch: 23, iter:  42,000, lr:(1.790e-04,1.791e-05,)] [eta: 6:06:40, time (data): 0.188 (0.002)] l_pix: -3.9911e+01 
+2025-03-12 14:36:08,390 INFO: [EFNet..][epoch: 23, iter:  42,200, lr:(1.788e-04,1.789e-05,)] [eta: 5:57:02, time (data): 13.690 (13.497)] l_pix: -4.0935e+01 
+2025-03-12 14:44:54,897 INFO: [EFNet..][epoch: 23, iter:  42,400, lr:(1.786e-04,1.787e-05,)] [eta: 5:46:40, time (data): 0.192 (0.002)] l_pix: -4.0584e+01 
+2025-03-12 14:53:35,197 INFO: [EFNet..][epoch: 23, iter:  42,600, lr:(1.784e-04,1.785e-05,)] [eta: 5:36:15, time (data): 0.188 (0.002)] l_pix: -4.2980e+01 
+2025-03-12 15:02:06,559 INFO: [EFNet..][epoch: 23, iter:  42,800, lr:(1.783e-04,1.783e-05,)] [eta: 5:25:43, time (data): 0.188 (0.002)] l_pix: -3.9977e+01 
+2025-03-12 15:11:31,498 INFO: [EFNet..][epoch: 23, iter:  43,000, lr:(1.781e-04,1.782e-05,)] [eta: 5:17:31, time (data): 0.190 (0.002)] l_pix: -4.1460e+01 
+2025-03-12 15:20:40,801 INFO: [EFNet..][epoch: 23, iter:  43,200, lr:(1.779e-04,1.780e-05,)] [eta: 5:08:37, time (data): 5.429 (5.235)] l_pix: -3.8510e+01 
+2025-03-12 15:29:37,431 INFO: [EFNet..][epoch: 23, iter:  43,400, lr:(1.777e-04,1.778e-05,)] [eta: 4:59:17, time (data): 0.189 (0.002)] l_pix: -4.3143e+01 
+2025-03-12 15:38:14,982 INFO: [EFNet..][epoch: 24, iter:  43,600, lr:(1.775e-04,1.776e-05,)] [eta: 4:49:25, time (data): 0.190 (0.002)] l_pix: -3.8064e+01 
+2025-03-12 15:47:38,266 INFO: [EFNet..][epoch: 24, iter:  43,800, lr:(1.773e-04,1.774e-05,)] [eta: 4:40:56, time (data): 0.188 (0.002)] l_pix: -3.9464e+01 
+2025-03-12 15:56:22,844 INFO: [EFNet..][epoch: 24, iter:  44,000, lr:(1.771e-04,1.772e-05,)] [eta: 4:31:23, time (data): 5.864 (5.670)] l_pix: -4.2729e+01 
+2025-03-12 16:05:49,533 INFO: [EFNet..][epoch: 24, iter:  44,200, lr:(1.769e-04,1.770e-05,)] [eta: 4:22:53, time (data): 0.191 (0.002)] l_pix: -3.9565e+01 
+2025-03-12 16:14:04,046 INFO: [EFNet..][epoch: 24, iter:  44,400, lr:(1.767e-04,1.768e-05,)] [eta: 4:12:46, time (data): 0.188 (0.002)] l_pix: -3.4391e+01 
+2025-03-12 16:22:45,754 INFO: [EFNet..][epoch: 24, iter:  44,600, lr:(1.765e-04,1.766e-05,)] [eta: 4:03:21, time (data): 0.188 (0.002)] l_pix: -3.5218e+01 
+2025-03-12 16:31:34,111 INFO: [EFNet..][epoch: 24, iter:  44,800, lr:(1.763e-04,1.764e-05,)] [eta: 3:54:06, time (data): 0.188 (0.002)] l_pix: -3.9534e+01 
+2025-03-12 16:40:59,353 INFO: [EFNet..][epoch: 24, iter:  45,000, lr:(1.761e-04,1.762e-05,)] [eta: 3:45:31, time (data): 1.878 (1.688)] l_pix: -3.5757e+01 
+2025-03-12 16:49:39,354 INFO: [EFNet..][epoch: 24, iter:  45,200, lr:(1.758e-04,1.760e-05,)] [eta: 3:36:10, time (data): 0.188 (0.002)] l_pix: -3.9972e+01 
+2025-03-12 16:59:19,729 INFO: [EFNet..][epoch: 25, iter:  45,400, lr:(1.756e-04,1.758e-05,)] [eta: 3:27:43, time (data): 17.953 (17.750)] l_pix: -3.8776e+01 
+2025-03-12 17:08:30,072 INFO: [EFNet..][epoch: 25, iter:  45,600, lr:(1.754e-04,1.755e-05,)] [eta: 3:18:48, time (data): 0.188 (0.002)] l_pix: -4.0070e+01 
+2025-03-12 17:17:12,666 INFO: [EFNet..][epoch: 25, iter:  45,800, lr:(1.752e-04,1.753e-05,)] [eta: 3:09:31, time (data): 0.188 (0.002)] l_pix: -3.9500e+01 
+2025-03-12 17:26:33,412 INFO: [EFNet..][epoch: 25, iter:  46,000, lr:(1.750e-04,1.751e-05,)] [eta: 3:00:42, time (data): 4.969 (4.774)] l_pix: -3.9154e+01 
+2025-03-12 17:35:06,995 INFO: [EFNet..][epoch: 25, iter:  46,200, lr:(1.748e-04,1.749e-05,)] [eta: 2:51:22, time (data): 0.274 (0.084)] l_pix: -4.2516e+01 
+2025-03-12 17:43:54,903 INFO: [EFNet..][epoch: 25, iter:  46,400, lr:(1.746e-04,1.747e-05,)] [eta: 2:42:13, time (data): 2.889 (2.694)] l_pix: -3.9570e+01 
+2025-03-12 17:53:52,663 INFO: [EFNet..][epoch: 25, iter:  46,600, lr:(1.744e-04,1.745e-05,)] [eta: 2:33:42, time (data): 12.239 (12.043)] l_pix: -3.8074e+01 
+2025-03-12 18:02:31,990 INFO: [EFNet..][epoch: 25, iter:  46,800, lr:(1.742e-04,1.743e-05,)] [eta: 2:24:28, time (data): 6.918 (6.724)] l_pix: -3.8707e+01 
+2025-03-12 18:10:55,043 INFO: [EFNet..][epoch: 25, iter:  47,000, lr:(1.740e-04,1.741e-05,)] [eta: 2:15:10, time (data): 0.188 (0.002)] l_pix: -3.9510e+01 
+2025-03-12 18:19:24,708 INFO: [EFNet..][epoch: 26, iter:  47,200, lr:(1.738e-04,1.739e-05,)] [eta: 2:05:57, time (data): 0.188 (0.002)] l_pix: -4.0617e+01 
+2025-03-12 18:28:13,864 INFO: [EFNet..][epoch: 26, iter:  47,400, lr:(1.736e-04,1.737e-05,)] [eta: 1:56:53, time (data): 7.466 (7.273)] l_pix: -3.9758e+01 
+2025-03-12 18:37:33,502 INFO: [EFNet..][epoch: 26, iter:  47,600, lr:(1.733e-04,1.735e-05,)] [eta: 1:47:59, time (data): 0.188 (0.002)] l_pix: -4.0876e+01 
+2025-03-12 18:46:28,839 INFO: [EFNet..][epoch: 26, iter:  47,800, lr:(1.731e-04,1.732e-05,)] [eta: 1:38:58, time (data): 0.188 (0.002)] l_pix: -3.4271e+01 
+2025-03-12 18:55:33,109 INFO: [EFNet..][epoch: 26, iter:  48,000, lr:(1.729e-04,1.730e-05,)] [eta: 1:29:59, time (data): 0.188 (0.002)] l_pix: -3.7069e+01 
+2025-03-12 19:05:39,264 INFO: [EFNet..][epoch: 26, iter:  48,200, lr:(1.727e-04,1.728e-05,)] [eta: 1:21:13, time (data): 0.190 (0.002)] l_pix: -4.1964e+01 
+2025-03-12 19:14:26,835 INFO: [EFNet..][epoch: 26, iter:  48,400, lr:(1.725e-04,1.726e-05,)] [eta: 1:12:08, time (data): 1.341 (1.151)] l_pix: -3.4379e+01 
+2025-03-12 19:23:17,470 INFO: [EFNet..][epoch: 26, iter:  48,600, lr:(1.723e-04,1.724e-05,)] [eta: 1:03:05, time (data): 0.188 (0.002)] l_pix: -3.7601e+01 
+2025-03-12 19:32:30,233 INFO: [EFNet..][epoch: 26, iter:  48,800, lr:(1.720e-04,1.722e-05,)] [eta: 0:54:06, time (data): 7.149 (6.954)] l_pix: -4.1136e+01 
+2025-03-12 19:41:03,489 INFO: [EFNet..][epoch: 27, iter:  49,000, lr:(1.718e-04,1.720e-05,)] [eta: 0:45:01, time (data): 7.052 (6.857)] l_pix: -4.2517e+01 
+2025-03-12 19:50:28,951 INFO: [EFNet..][epoch: 27, iter:  49,200, lr:(1.716e-04,1.717e-05,)] [eta: 0:36:02, time (data): 3.281 (3.090)] l_pix: -4.0867e+01 
+2025-03-12 19:59:29,761 INFO: [EFNet..][epoch: 27, iter:  49,400, lr:(1.714e-04,1.715e-05,)] [eta: 0:27:01, time (data): 9.537 (9.339)] l_pix: -4.0709e+01 
+2025-03-12 20:07:39,985 INFO: [EFNet..][epoch: 27, iter:  49,600, lr:(1.712e-04,1.713e-05,)] [eta: 0:17:57, time (data): 1.758 (1.567)] l_pix: -4.3783e+01 
+2025-03-12 20:17:05,552 INFO: [EFNet..][epoch: 27, iter:  49,800, lr:(1.709e-04,1.711e-05,)] [eta: 0:08:58, time (data): 0.189 (0.002)] l_pix: -3.9432e+01 
+2025-03-12 20:26:58,205 INFO: [EFNet..][epoch: 27, iter:  50,000, lr:(1.707e-04,1.709e-05,)] [eta: -1 day, 23:59:58, time (data): 0.191 (0.004)] l_pix: -4.1059e+01 
+2025-03-12 20:43:06,024 INFO: Validation EFNet_highrev_single_deblur,		 # psnr: 34.9590	 # ssim: 0.9671
+2025-03-12 20:43:06,038 INFO: End of training. Time consumed: 7:47:43
+2025-03-12 20:43:06,038 INFO: Save the latest model.
+2025-03-12 20:59:06,561 INFO: Validation EFNet_highrev_single_deblur,		 # psnr: 34.9590	 # ssim: 0.9671
